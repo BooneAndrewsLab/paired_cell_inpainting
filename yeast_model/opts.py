@@ -16,7 +16,7 @@ learning_rate = 1e-4
 epochs = 30
 
 checkpoint_path = './pretrained_weights/'	# Path to save the weights in after training
-data_path = '/mnt/storage/test_features_crops'		# Path to get image data
+data_path = '/mnt/matej_external/crop_test/crops/Screens_Rad52'		# Path to get image data
 
 if checkpoint_path != '' and not os.path.isdir(checkpoint_path):
     os.mkdir(checkpoint_path)

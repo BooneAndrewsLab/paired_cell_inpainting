@@ -21,7 +21,7 @@ import keras
 import skimage.exposure
 
 import opts as opt
-from dataset import Dataset
+from dataset_boone import Dataset
 from pair_model import Pair_Model
 
 '''Given a dataset class (see dataset.py), load an image from the class'''
@@ -110,6 +110,7 @@ if __name__ == "__main__":
     ds = Dataset()
     ds.add_dataset(opt.data_path)
     ds.prepare()
+
     train_generator = data_generator(ds, batch_size=opt.batch_size)
     steps = len(ds.image_info) // opt.batch_size
 
