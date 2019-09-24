@@ -50,6 +50,9 @@ class Dataset(object):
         for d in root_dir.rglob('*dat'):
             num_cells = d.stat().st_size // CROP_ST_SIZE
 
+            if num_cells == 1:
+                continue
+
             for cell in range(num_cells):
                 self.add_image(
                     image_id=i,
@@ -87,7 +90,7 @@ class Dataset(object):
         num_cells = crops.shape[0]
 
         if num_cells == 1:
-            raise ValueError(image['path'] + " has only one cell.")
+            raise ValueError("%s has only one cell." % (image['path'], ))
 
         random_cell = crops[get_random_cell(num_cells, image['index'])]
         protein = random_cell[0]
