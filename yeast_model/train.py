@@ -1,31 +1,26 @@
-'''
+"""
 Script to train a yeast paired cell inpainting model from scratch.
 
 Author: Alex Lu
 Email: alexlu@cs.toronto.edu
 Copyright (C) 2018 Alex Lu
-'''
-
-import os
-
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-os.environ['KERAS_BACKEND'] = 'tensorflow'
-
+"""
 import warnings
-warnings.filterwarnings("ignore", category=UserWarning)
 
 import numpy as np
-import tensorflow as tf
-import keras
 import skimage.exposure
+import tensorflow as tf
 
-import opts as opt
-from dataset_boone import Dataset
-from pair_model import Pair_Model
+from . import opts as opt
+from .dataset_boone_opt import Dataset
+from .pair_model import Pair_Model
 
-'''Given a dataset class (see dataset.py), load an image from the class'''
+warnings.filterwarnings("ignore", category=UserWarning)
+
+
 def load_image_gt(ds, image_id, augment=True):
+    """Given a dataset class (see dataset.py), load an image from the class"""
+
     # Load image and pair
     x_protein, x_bf, label = ds.load_image_with_label(image_id)
     y_protein, y_bf = ds.sample_pair_equally(image_id)
@@ -39,7 +34,7 @@ def load_image_gt(ds, image_id, augment=True):
             x_bf = skimage.exposure.rescale_intensity(x_bf.astype(np.float32), out_range=(0, 1))
             y_bf = skimage.exposure.rescale_intensity(y_bf.astype(np.float32), out_range=(0, 1))
         except RuntimeWarning:
-            print (label)
+            print(label)
 
     # Randomly flip the images if augmenting
     if augment:
@@ -63,11 +58,14 @@ def load_image_gt(ds, image_id, augment=True):
 
     return x_in, y_in, y_out
 
-'''Data generator for Keras model (retrieves images infinitely)'''
-def data_generator(dataset, shuffle=True, augment=True, batch_size=1):
+
+def data_generator(ds, shuffle=True, augment=True, batch_size=1):
+    """Data generator for Keras model (retrieves images infinitely)"""
+
     b = 0  # batch item index
     image_index = -1
-    image_ids = np.copy(dataset.image_ids)
+    image_ids = np.copy(ds.image_ids)
+    batch_x_in = batch_y_in = batch_y_out = None
 
     # Runs indefinitely for Keras
     while True:
@@ -78,7 +76,7 @@ def data_generator(dataset, shuffle=True, augment=True, batch_size=1):
 
         # Get current image
         image_id = image_ids[image_index]
-        x_in, y_in, y_out = load_image_gt(dataset, image_id, augment=augment)
+        x_in, y_in, y_out = load_image_gt(ds, image_id, augment=augment)
 
         # Initialize batch arrays if empty
         if b == 0:
@@ -107,23 +105,22 @@ if __name__ == "__main__":
     print("Preparing the dataset...")
     # Load all images in the training set (argument given in opts.py) into a Dataset class and
     # create data generator for training
-    ds = Dataset()
-    ds.add_dataset(opt.data_path)
-    ds.prepare()
+    dataset = Dataset()
+    dataset.add_dataset(opt.data_path)
+    dataset.prepare()
 
-    train_generator = data_generator(ds, batch_size=opt.batch_size)
-    steps = len(ds.image_info) // opt.batch_size
+    train_generator = data_generator(dataset, batch_size=opt.batch_size)
+    steps = len(dataset.image_info) // opt.batch_size
 
     print("Training the model...")
     # Train the model (specify learning rates and epochs here)
     model = Pair_Model().create_model((opt.im_h, opt.im_w, 2), (opt.im_h, opt.im_w, 1))
 
     optimizer = tf.train.AdamOptimizer(learning_rate=opt.learning_rate, beta1=0.5)
-    model.compile(optimizer=optimizer, loss='mean_squared_error')
+    model.compile(optimizer=optimizer, loss='mean_squared_error', per_process_gpu_memory_fraction=.4)
     model.fit_generator(train_generator, steps_per_epoch=steps, epochs=opt.epochs, workers=40, max_queue_size=150,
                         use_multiprocessing=True)
 
     print("Saving model weights in " + opt.checkpoint_path)
     # Save the model weights
     model.save(opt.checkpoint_path + "model_weights.h5")
-
