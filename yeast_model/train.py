@@ -11,9 +11,9 @@ import numpy as np
 import skimage.exposure
 import tensorflow as tf
 
-from . import opts as opt
-from .dataset_boone_opt import Dataset
-from .pair_model import Pair_Model
+import opts as opt
+from dataset_boone_opt import Dataset
+from pair_model import Pair_Model
 
 warnings.filterwarnings("ignore", category=UserWarning)
 

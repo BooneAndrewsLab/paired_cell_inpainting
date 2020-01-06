@@ -19,8 +19,10 @@ im_w = 64  # Width of input images
 learning_rate = 1e-4
 epochs = 30
 
-checkpoint_path = './pretrained_weights/'  # Path to save the weights in after training
-data_path = '/mnt/matej_external/crop_test/crops/Screens_Rad52'  # Path to get image data
+# Path to save the weights in after training
+checkpoint_path = '/home/nilsahin/PycharmProjects/paired_cell_inpainting/yeast_model/pretrained_weights/'
+# Path to get image data
+data_path = '/home/nilsahin/crops/Screens_Nop10'
 
 if checkpoint_path != '' and not os.path.isdir(checkpoint_path):
     os.mkdir(checkpoint_path)
