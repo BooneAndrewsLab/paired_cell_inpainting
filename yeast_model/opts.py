@@ -22,7 +22,7 @@ epochs = 30
 # Path to save the weights in after training
 checkpoint_path = '/home/nilsahin/PycharmProjects/paired_cell_inpainting/yeast_model/pretrained_weights/'
 # Path to get image data
-data_path = '/home/nilsahin/crops/Screens_Nop10'
+data_path = '/home/nilsahin/crops/Screens_Rad52'
 
 if checkpoint_path != '' and not os.path.isdir(checkpoint_path):
     os.mkdir(checkpoint_path)
