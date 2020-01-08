@@ -117,7 +117,8 @@ if __name__ == "__main__":
     model = Pair_Model().create_model((opt.im_h, opt.im_w, 2), (opt.im_h, opt.im_w, 1))
 
     optimizer = tf.train.AdamOptimizer(learning_rate=opt.learning_rate, beta1=0.5)
-    model.compile(optimizer=optimizer, loss='mean_squared_error', per_process_gpu_memory_fraction=.4)
+    #model.compile(optimizer=optimizer, loss='mean_squared_error', per_process_gpu_memory_fraction=.4)
+    model.compile(optimizer=optimizer, loss='mean_squared_error')
     model.fit_generator(train_generator, steps_per_epoch=steps, epochs=opt.epochs, workers=40, max_queue_size=150,
                         use_multiprocessing=True)
 
